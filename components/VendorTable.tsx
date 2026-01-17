@@ -6,13 +6,9 @@ import { useRouter } from "next/navigation";
 type Vendor = {
   id: number;
   agency_name: string;
-  supplier_type: string;
   category: string;
-  base_location: string;
   financial_strength: number;
   vendor_class: string;
-  phone: string;
-  email: string;
   msme: boolean;
 };
 
@@ -124,15 +120,28 @@ export default function VendorTable() {
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {filteredVendors.map((v) => (
-              <tr key={v.id} className="border-t hover:bg-gray-50">
+              <tr
+                key={v.id}
+                className="border-t hover:bg-gray-50 cursor-pointer"
+                onClick={() => router.push(`/vendors/${v.id}/view`)}
+              >
                 <td className="p-3 font-medium">{v.agency_name}</td>
                 <td className="p-3">{v.category}</td>
                 <td className="p-3 text-right">{v.financial_strength}</td>
-                <td className="p-3 text-center font-bold">{v.vendor_class}</td>
-                <td className="p-3 text-center">{v.msme ? "✅" : "—"}</td>
-                <td className="p-3 text-center space-x-2">
+                <td className="p-3 text-center font-bold">
+                  {v.vendor_class}
+                </td>
+                <td className="p-3 text-center">
+                  {v.msme ? "✅" : "—"}
+                </td>
+
+                <td
+                  className="p-3 text-center space-x-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
                     onClick={() => router.push(`/vendors/${v.id}`)}
                     className="text-blue-600 hover:underline"
@@ -148,9 +157,13 @@ export default function VendorTable() {
                 </td>
               </tr>
             ))}
+
             {filteredVendors.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-gray-500">
+                <td
+                  colSpan={6}
+                  className="p-6 text-center text-gray-500"
+                >
                   No vendors found
                 </td>
               </tr>
