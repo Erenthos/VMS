@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Vendor = {
   id: number;
@@ -17,34 +18,37 @@ type Vendor = {
 
 export default function VendorTable() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  useEffect(() => {
+  function loadVendors() {
     fetch("/api/vendors")
       .then((res) => res.json())
-      .then((data) => {
-        setVendors(data);
-        setLoading(false);
-      });
+      .then(setVendors);
+  }
+
+  useEffect(() => {
+    loadVendors();
   }, []);
 
-  if (loading) {
-    return <p className="p-4">Loading vendors...</p>;
+  async function deleteVendor(id: number) {
+    if (!confirm("Are you sure you want to delete this vendor?")) return;
+
+    await fetch(`/api/vendors/${id}`, { method: "DELETE" });
+    loadVendors();
   }
 
   return (
     <div className="overflow-x-auto bg-white rounded-lg shadow">
-      <table className="min-w-full border-collapse">
+      <table className="min-w-full">
         <thead className="bg-gray-100 text-sm">
           <tr>
             <th className="p-3 text-left">Agency</th>
             <th className="p-3 text-left">Type</th>
             <th className="p-3 text-left">Category</th>
-            <th className="p-3 text-left">Location</th>
-            <th className="p-3 text-right">Financial (Cr)</th>
+            <th className="p-3 text-right">Financial</th>
             <th className="p-3 text-center">Class</th>
-            <th className="p-3 text-left">Contact</th>
             <th className="p-3 text-center">MSME</th>
+            <th className="p-3 text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -53,31 +57,22 @@ export default function VendorTable() {
               <td className="p-3 font-medium">{v.agency_name}</td>
               <td className="p-3">{v.supplier_type}</td>
               <td className="p-3">{v.category}</td>
-              <td className="p-3">{v.base_location}</td>
               <td className="p-3 text-right">{v.financial_strength}</td>
-              <td className="p-3 text-center font-bold">
-                <span
-                  className={`px-2 py-1 rounded text-white ${
-                    v.vendor_class === "A"
-                      ? "bg-green-600"
-                      : v.vendor_class === "B"
-                      ? "bg-blue-600"
-                      : v.vendor_class === "C"
-                      ? "bg-yellow-500"
-                      : v.vendor_class === "D"
-                      ? "bg-orange-500"
-                      : "bg-red-600"
-                  }`}
+              <td className="p-3 text-center font-bold">{v.vendor_class}</td>
+              <td className="p-3 text-center">{v.msme ? "✅" : "—"}</td>
+              <td className="p-3 text-center space-x-2">
+                <button
+                  onClick={() => router.push(`/vendors/${v.id}`)}
+                  className="text-blue-600 hover:underline"
                 >
-                  {v.vendor_class}
-                </span>
-              </td>
-              <td className="p-3">
-                <div className="text-sm">{v.phone}</div>
-                <div className="text-xs text-gray-500">{v.email}</div>
-              </td>
-              <td className="p-3 text-center">
-                {v.msme ? "✅" : "—"}
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteVendor(v.id)}
+                  className="text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
@@ -86,4 +81,3 @@ export default function VendorTable() {
     </div>
   );
 }
-
