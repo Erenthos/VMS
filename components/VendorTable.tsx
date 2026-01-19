@@ -55,8 +55,8 @@ export default function VendorTable() {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 bg-white p-4 rounded shadow">
+      {/* Top Controls */}
+      <div className="flex flex-wrap gap-3 bg-white p-4 rounded shadow items-center">
         <input
           type="text"
           placeholder="Search by Agency / Category"
@@ -99,6 +99,25 @@ export default function VendorTable() {
           Clear Filters
         </button>
 
+        {/* Bulk Import */}
+        <form
+          action="/api/vendors/import"
+          method="POST"
+          encType="multipart/form-data"
+        >
+          <label className="cursor-pointer bg-gray-200 px-4 py-2 rounded text-sm hover:bg-gray-300">
+            Bulk Import
+            <input
+              type="file"
+              name="file"
+              accept=".xlsx"
+              hidden
+              onChange={(e) => e.target.form?.submit()}
+            />
+          </label>
+        </form>
+
+        {/* Add Vendor */}
         <button
           onClick={() => router.push("/vendors/new")}
           className="ml-auto bg-black text-white px-4 py-2 rounded"
