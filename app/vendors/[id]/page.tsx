@@ -8,11 +8,15 @@ export default function EditVendorPage() {
   const { id } = useParams();
   const router = useRouter();
   const [vendor, setVendor] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`/api/vendors/${id}`)
       .then((res) => res.json())
-      .then(setVendor);
+      .then((data) => {
+        setVendor(data);
+        setLoading(false);
+      });
   }, [id]);
 
   async function updateVendor(data: any) {
@@ -22,16 +26,25 @@ export default function EditVendorPage() {
       body: JSON.stringify(data),
     });
 
-    router.push("/vendors");
+    router.push(`/vendors/${id}/view`);
   }
 
-  if (!vendor) return <p className="p-6">Loading vendor...</p>;
+  if (loading) {
+    return <div className="p-6">Loading vendor details...</div>;
+  }
+
+  if (!vendor) {
+    return <div className="p-6">Vendor not found</div>;
+  }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6 space-y-4 max-w-5xl mx-auto">
       <h1 className="text-2xl font-semibold">Edit Vendor</h1>
-      <VendorForm onSubmit={updateVendor} />
+
+      <VendorForm
+        onSubmit={updateVendor}
+        initialData={vendor}   {/* ✅ THIS WAS MISSING */}
+      />
     </div>
   );
 }
-
