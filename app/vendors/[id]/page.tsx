@@ -5,8 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import VendorForm from "@/components/VendorForm";
 
 export default function EditVendorPage() {
-  const { id } = useParams();
+  const params = useParams();
   const router = useRouter();
+  const id = params.id as string;
+
   const [vendor, setVendor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +45,7 @@ export default function EditVendorPage() {
 
       <VendorForm
         onSubmit={updateVendor}
-        initialData={vendor}   {/* ✅ THIS WAS MISSING */}
+        initialData={vendor}
       />
     </div>
   );
