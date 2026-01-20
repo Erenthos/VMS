@@ -13,11 +13,31 @@ export async function POST(req: Request) {
 
     const query = `
       INSERT INTO vendors (
-        supplier_type, company_type, category, base_location,
-        agency_name, year_of_establishment, financial_strength,
-        vendor_class, contact_name, phone, email, gst_details, msme
+        supplier_type,
+        company_type,
+        category,
+        sub_category,
+        base_location,
+        agency_name,
+        year_of_establishment,
+        financial_strength,
+        vendor_class,
+        contact_name,
+        phone,
+        email,
+        gst_details,
+        pf,
+        esic,
+        pan,
+        msme,
+        active_status
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+      VALUES (
+        $1,$2,$3,$4,$5,
+        $6,$7,$8,$9,$10,
+        $11,$12,$13,$14,$15,
+        $16,$17,$18
+      )
       RETURNING *
     `;
 
@@ -25,6 +45,7 @@ export async function POST(req: Request) {
       body.supplierType,
       body.companyType,
       body.category,
+      body.subCategory,
       body.baseLocation,
       body.agencyName,
       body.yearOfEstablishment,
@@ -34,12 +55,16 @@ export async function POST(req: Request) {
       body.phone,
       body.email,
       body.gstDetails,
+      body.pf,
+      body.esic,
+      body.pan,
       body.msme,
+      body.activeStatus ?? true
     ];
 
     const result = await pool.query(query, values);
-
     return NextResponse.json(result.rows[0], { status: 201 });
+
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -63,4 +88,3 @@ export async function GET() {
     );
   }
 }
-
