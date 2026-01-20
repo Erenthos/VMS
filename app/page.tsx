@@ -56,7 +56,7 @@ export default function HomePage() {
           {[
             {
               title: "Auto Classification",
-              desc: "Vendors classified A–E based on financial strength."
+              desc: "Vendors are automatically classified based on financial strength: Class A (> ₹200 Cr), Class B (₹100–200 Cr), Class C (₹50–100 Cr), Class D (₹10–50 Cr), Class E (< ₹10 Cr)."
             },
             {
               title: "MSME Visibility",
