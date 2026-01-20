@@ -7,9 +7,11 @@ type Vendor = {
   id: number;
   agency_name: string;
   category: string;
+  sub_category: string;
   financial_strength: number;
   vendor_class: string;
   msme: boolean;
+  active_status: boolean;
 };
 
 export default function VendorTable() {
@@ -17,6 +19,7 @@ export default function VendorTable() {
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("");
   const [msmeFilter, setMsmeFilter] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
   const router = useRouter();
 
   function loadVendors() {
@@ -38,7 +41,8 @@ export default function VendorTable() {
   const filteredVendors = vendors.filter((v) => {
     const matchesSearch =
       v.agency_name.toLowerCase().includes(search.toLowerCase()) ||
-      v.category?.toLowerCase().includes(search.toLowerCase());
+      v.category?.toLowerCase().includes(search.toLowerCase()) ||
+      v.sub_category?.toLowerCase().includes(search.toLowerCase());
 
     const matchesClass =
       classFilter === "" || v.vendor_class === classFilter;
@@ -50,19 +54,31 @@ export default function VendorTable() {
         ? v.msme
         : !v.msme;
 
-    return matchesSearch && matchesClass && matchesMsme;
+    const matchesActive =
+      activeFilter === ""
+        ? true
+        : activeFilter === "active"
+        ? v.active_status
+        : !v.active_status;
+
+    return (
+      matchesSearch &&
+      matchesClass &&
+      matchesMsme &&
+      matchesActive
+    );
   });
 
   return (
     <div className="space-y-4">
-      {/* Top Controls */}
+      {/* Filters */}
       <div className="flex flex-wrap gap-3 bg-white p-4 rounded shadow items-center">
         <input
           type="text"
-          placeholder="Search by Agency / Category"
+          placeholder="Search by Agency / Category / Sub Category"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-64"
+          className="border p-2 rounded w-72"
         />
 
         <select
@@ -88,36 +104,28 @@ export default function VendorTable() {
           <option value="no">Non-MSME</option>
         </select>
 
+        <select
+          value={activeFilter}
+          onChange={(e) => setActiveFilter(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="">All Status</option>
+          <option value="active">Active Vendors</option>
+          <option value="inactive">Inactive Vendors</option>
+        </select>
+
         <button
           onClick={() => {
             setSearch("");
             setClassFilter("");
             setMsmeFilter("");
+            setActiveFilter("");
           }}
           className="text-sm text-blue-600 underline"
         >
           Clear Filters
         </button>
 
-        {/* Bulk Import */}
-        <form
-          action="/api/vendors/import"
-          method="POST"
-          encType="multipart/form-data"
-        >
-          <label className="cursor-pointer bg-gray-200 px-4 py-2 rounded text-sm hover:bg-gray-300">
-            Bulk Import
-            <input
-              type="file"
-              name="file"
-              accept=".xlsx"
-              hidden
-              onChange={(e) => e.target.form?.submit()}
-            />
-          </label>
-        </form>
-
-        {/* Add Vendor */}
         <button
           onClick={() => router.push("/vendors/new")}
           className="ml-auto bg-black text-white px-4 py-2 rounded"
@@ -136,6 +144,7 @@ export default function VendorTable() {
               <th className="p-3 text-right">Financial (Cr)</th>
               <th className="p-3 text-center">Class</th>
               <th className="p-3 text-center">MSME</th>
+              <th className="p-3 text-center">Active</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
@@ -148,15 +157,26 @@ export default function VendorTable() {
                 onClick={() => router.push(`/vendors/${v.id}/view`)}
               >
                 <td className="p-3 font-medium">{v.agency_name}</td>
-                <td className="p-3">{v.category}</td>
-                <td className="p-3 text-right">{v.financial_strength}</td>
+                <td className="p-3">
+                  {v.category}
+                  {v.sub_category && (
+                    <div className="text-xs text-gray-500">
+                      {v.sub_category}
+                    </div>
+                  )}
+                </td>
+                <td className="p-3 text-right">
+                  {v.financial_strength}
+                </td>
                 <td className="p-3 text-center font-bold">
                   {v.vendor_class}
                 </td>
                 <td className="p-3 text-center">
                   {v.msme ? "✅" : "—"}
                 </td>
-
+                <td className="p-3 text-center">
+                  {v.active_status ? "🟢" : "🔴"}
+                </td>
                 <td
                   className="p-3 text-center space-x-2"
                   onClick={(e) => e.stopPropagation()}
@@ -180,7 +200,7 @@ export default function VendorTable() {
             {filteredVendors.length === 0 && (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="p-6 text-center text-gray-500"
                 >
                   No vendors found
