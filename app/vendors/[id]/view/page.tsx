@@ -19,7 +19,7 @@ export default function VendorDetailsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+    <div className="p-6 space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">
@@ -41,20 +41,40 @@ export default function VendorDetailsPage() {
         </div>
       </div>
 
-      {/* Details Card */}
+      {/* Vendor Details */}
       <div className="card grid grid-cols-2 gap-6 text-sm">
+        {/* Company Info */}
         <Detail label="Supplier / Contractor" value={vendor.supplier_type} />
         <Detail label="Type of Company" value={vendor.company_type} />
         <Detail label="Category" value={vendor.category} />
+        <Detail label="Sub Category" value={vendor.sub_category} />
         <Detail label="Base Location" value={vendor.base_location} />
         <Detail label="Year of Establishment" value={vendor.year_of_establishment} />
-        <Detail label="Financial Strength (Cr)" value={vendor.financial_strength} />
+
+        {/* Financial Info */}
+        <Detail
+          label="Financial Strength (Cr)"
+          value={vendor.financial_strength}
+        />
         <Detail label="Vendor Class" value={vendor.vendor_class} />
-        <Detail label="MSME" value={vendor.msme ? "Yes" : "No"} />
+
+        {/* Contact Info */}
         <Detail label="Contact Name" value={vendor.contact_name} />
         <Detail label="Phone" value={vendor.phone} />
         <Detail label="Email" value={vendor.email} />
+
+        {/* Statutory Info */}
         <Detail label="GST Details" value={vendor.gst_details} />
+        <Detail label="PAN" value={vendor.pan} />
+        <Detail label="PF" value={vendor.pf} />
+        <Detail label="ESIC" value={vendor.esic} />
+
+        {/* Flags */}
+        <Detail label="MSME" value={vendor.msme ? "Yes" : "No"} />
+        <Detail
+          label="Active Status"
+          value={vendor.active_status ? "Active" : "Inactive"}
+        />
       </div>
     </div>
   );
@@ -65,7 +85,9 @@ function Detail({ label, value }: { label: string; value: any }) {
     <div>
       <div className="text-gray-500">{label}</div>
       <div className="font-medium text-gray-900 mt-1">
-        {value || "—"}
+        {value !== null && value !== undefined && value !== ""
+          ? value
+          : "—"}
       </div>
     </div>
   );
