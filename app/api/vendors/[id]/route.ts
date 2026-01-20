@@ -25,26 +25,32 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   const body = await req.json();
+
   const vendorClass = calculateVendorClass(
     Number(body.financialStrength)
   );
 
   const query = `
     UPDATE vendors SET
-      supplier_type=$1,
-      company_type=$2,
-      category=$3,
-      base_location=$4,
-      agency_name=$5,
-      year_of_establishment=$6,
-      financial_strength=$7,
-      vendor_class=$8,
-      contact_name=$9,
-      phone=$10,
-      email=$11,
-      gst_details=$12,
-      msme=$13
-    WHERE id=$14
+      supplier_type = $1,
+      company_type = $2,
+      category = $3,
+      sub_category = $4,
+      base_location = $5,
+      agency_name = $6,
+      year_of_establishment = $7,
+      financial_strength = $8,
+      vendor_class = $9,
+      contact_name = $10,
+      phone = $11,
+      email = $12,
+      gst_details = $13,
+      pf = $14,
+      esic = $15,
+      pan = $16,
+      msme = $17,
+      active_status = $18
+    WHERE id = $19
     RETURNING *
   `;
 
@@ -52,6 +58,7 @@ export async function PUT(
     body.supplierType,
     body.companyType,
     body.category,
+    body.subCategory,
     body.baseLocation,
     body.agencyName,
     body.yearOfEstablishment,
@@ -61,8 +68,12 @@ export async function PUT(
     body.phone,
     body.email,
     body.gstDetails,
+    body.pf,
+    body.esic,
+    body.pan,
     body.msme,
-    params.id,
+    body.activeStatus,
+    params.id
   ];
 
   const result = await pool.query(query, values);
@@ -74,7 +85,9 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  await pool.query("DELETE FROM vendors WHERE id=$1", [params.id]);
+  await pool.query(
+    "DELETE FROM vendors WHERE id = $1",
+    [params.id]
+  );
   return NextResponse.json({ success: true });
 }
-
