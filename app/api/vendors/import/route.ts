@@ -9,7 +9,10 @@ export async function POST(req: Request) {
     const file = formData.get("file") as File;
 
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No file uploaded" },
+        { status: 400 }
+      );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -23,52 +26,83 @@ export async function POST(req: Request) {
       await client.query("BEGIN");
 
       for (const row of rows) {
-        const financial = Number(row["Financial Strength (Cr)"] || 0);
-        const vendorClass = calculateVendorClass(financial);
+        const financialStrength = Number(
+          row["Financial Strength (Cr)"] || 0
+        );
+
+        const vendorClass =
+          calculateVendorClass(financialStrength);
 
         await client.query(
           `
           INSERT INTO vendors (
-            supplier_type, company_type, category, base_location,
-            agency_name, year_of_establishment, financial_strength,
-            vendor_class, contact_name, phone, email, gst_details, msme
+            supplier_type,
+            company_type,
+            category,
+            sub_category,
+            base_location,
+            agency_name,
+            year_of_establishment,
+            financial_strength,
+            vendor_class,
+            contact_name,
+            phone,
+            email,
+            gst_details,
+            pan,
+            pf,
+            esic,
+            msme,
+            active_status
           )
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-        `,
+          VALUES (
+            $1,$2,$3,$4,$5,
+            $6,$7,$8,$9,$10,
+            $11,$12,$13,$14,$15,
+            $16,$17,$18
+          )
+          `,
           [
-            row["Supplier / Contractor"],
-            row["Type of Company"],
-            row["Category"],
-            row["Base Location"],
+            row["Supplier / Contractor"] || null,
+            row["Type of Company"] || null,
+            row["Category"] || null,
+            row["Sub Category"] || null,
+            row["Base Location"] || null,
             row["Agency Name"],
-            row["Year of Establishment"],
-            financial,
+            row["Year of Establishment"] || null,
+            financialStrength,
             vendorClass,
-            row["Name"],
-            row["Phone No"],
-            row["Email"],
-            row["GST Details"],
-            row["MSME"] === "Yes"
+            row["Name"] || null,
+            row["Phone No"] || null,
+            row["Email"] || null,
+            row["GST Details"] || null,
+            row["PAN"] || null,
+            row["PF"] || null,
+            row["ESIC"] || null,
+            row["MSME"] === "Yes",
+            row["Active Status"]
+              ? row["Active Status"] === "Yes"
+              : true
           ]
         );
       }
 
       await client.query("COMMIT");
+
+      return NextResponse.json({
+        success: true,
+        imported: rows.length
+      });
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;
     } finally {
       client.release();
     }
-
-    return NextResponse.json({
-      success: true,
-      imported: rows.length
-    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Import failed" },
+      { error: "Bulk import failed" },
       { status: 500 }
     );
   }
